@@ -1,0 +1,18 @@
+html
+    head
+        title Strava 28 last days
+        link(rel='stylesheet', href='/css/style.css')
+    body
+        .content
+            .text Your last 28 strava days
+            each val, key in data
+                .type #{key}s
+                    .data= val.total
+                    .unit km total
+                    .legend longest #{key} #{val.longest} km
+                    .interval-graph
+                        ul
+                            each day in val.days
+                                li
+                                    .bar
+                                        .fill(style='height:' + 100 * day / val.longest + '%')

@@ -1,0 +1,96 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    /*padding: 25%;*/
+    /*padding: 10px;*/
+    color: #999;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    /*margin: 10px;*/
+}
+.content {
+    max-width: 300px;
+    min-width: 300px;
+    /*min-height: 300px;*/
+
+    margin-left: auto;
+    margin-right: auto;
+    /*border: 10px solid #f5f5f5;*/
+    border-bottom: 0;
+    text-transform: uppercase;
+    /*box-shadow: inset;*/
+}
+
+.type {
+    background: #f5f5f5;
+    position: relative;
+    /*padding-bottom: 82px;*/
+    margin: 0 0 10px 0;
+    padding: 10px 10px 82px 10px;
+}
+
+.text {
+    text-align: right;
+    /*text-transform: none;*/
+    /*font-weight: bold;*/
+    background: #FC4C02;
+    color: #fff;
+    padding: 10px;
+}
+.data {
+    font-size: 5em;
+    font-weight: bold;
+    color: #666
+}
+.unit {
+
+}
+
+.legend {
+    margin-top: 5px;
+    font-size: .8em;
+    text-align: right;
+    text-transform: lowercase;
+}
+
+ul {
+    list-style: none;
+}
+
+.interval-graph {
+    /*border-top: 1px dashed #fff;*/
+    /*border-top: 1px dashed #FC4C02;*/
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    bottom: 0;
+    position: absolute;
+}
+.interval-graph ul {
+    height: 81px;
+    padding: 0;
+    margin: 0;
+}
+.interval-graph li {
+    margin: 0 1px 0 0;
+    border-top: 1px solid #0070A0;
+    /*border-top: 1px solid #FC4C02;*/
+    height: 50px;
+    float: left;
+    width: 9px;
+}
+.bar {
+    position: relative;
+    float: left;
+    height: 80px;
+    width: 100%;
+}
+.fill {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    background: #0070A0;
+    border-bottom: 1px solid #0070A0;
+}

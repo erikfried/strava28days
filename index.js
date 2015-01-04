@@ -1,5 +1,7 @@
 var strava = require('./lib/strava');
 var oauth = require('./lib/oauth');
+var _ = require('lodash');
+var moment = require('moment');
 
 console.log('ENV', process.env);
 
@@ -17,34 +19,81 @@ function getRunMeters(payload) {
 
 }
 
-function getLast28StravaDays(token) {
-    var twentyEightDaysAgo = Math.round((new Date().getTime() - 1000 * 3600 * 24 * 28) / 1000);
+function getLastStravaDays(token, startMoment) {
     return strava.listActivities({
-        after: twentyEightDaysAgo,
+        after: startMoment.unix(),
         access_token: token
+    }).then(function groupByActivity (activities) {
+        return _.groupBy(activities, 'type')
     });
 }
+function metersToKms (number) {
+    return (Math.round(number /100)) /10
+}
+function fillDates(days, startMoment, endMoment) {
+    var dates = [];
+    var interval = endMoment ? endMoment.diff(startMoment, 'days') : 28;
+    var current = startMoment, i, value;
+    for (i = 0; i < interval; i++) {
+        value = days[current.format('YYYY-MM-DD')] || 0;
+        dates.push(metersToKms(value));
+        current = current.add(1, 'days');
+    }
+    return dates;
+}
+function calcStats (startMoment) {
+    return function (activitiesByType) {
+        return _.transform(activitiesByType, function (result, activities, type) {
+            var days =  _.chain(activities)
+                .groupBy(function (a) {return a.start_date.substring(0,10);})
+                .mapValues(function (val) {
+                    return _.reduce(val, function (sum, act){
+                        return sum + act.distance
+                    }, 0);
+                })
+                .value();
 
+            result[type] = {
+                longest: metersToKms(_.chain(days)
+                    .values()
+                    .max()
+                    .value()),
+                total: metersToKms(_.reduce(days, function (sum, activity) { return sum += activity;})),
+                days: fillDates(days, startMoment)
+            }
+        });
+    };
+};
 var express = require('express');
 var app = express();
 
+app.set('view engine', 'jade');
+
 app.use(require('cookie-parser')());
 app.use(require('helmet')());
+app.use(express.static('public', {}));
 
 var COOKIE_NAME = 'strvtkn';
 var OAUTH_INIT_PATH = '/oauth/init';
 var PORT = process.env.PORT || 3000;
 var APP_HOST = process.env.APP_HOST || 'http://localhost:' + PORT;
 
+// MIDDLEWARE
+//Check user status
 app.use(function checkKnownUser(req, res, next) {
     console.log('req', req.cookies);
     if (req.cookies[COOKIE_NAME]) {
         //ok
         next();
     } else if (!req.query.code) {
-        res.redirect('https://www.strava.com/oauth/authorize?client_id=' + process.env.STRAVA_CLIENT_ID +
-        '&response_type=code' +
-        '&redirect_uri=' + APP_HOST + OAUTH_INIT_PATH)
+        var authUrl = 'https://www.strava.com/oauth/authorize?client_id=' + process.env.STRAVA_CLIENT_ID +
+            '&response_type=code' +
+            '&redirect_uri=' + APP_HOST + OAUTH_INIT_PATH;
+        console.log(authUrl);
+        res.render('index', {
+            authUrl: authUrl
+        });
+        //res.redirect()
     } else if (req.query.code) {
         console.log('New session!');
         next();
@@ -52,6 +101,12 @@ app.use(function checkKnownUser(req, res, next) {
         console.warn('Unexpected', req.url);
     }
 });
+app.use(function(err, req, res, next){
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+
+//ROUTES
 app.get(OAUTH_INIT_PATH, function initUser(req, res) {
     console.log('Init oauth', req.query.code);
     oauth.getToken(req.query.code)
@@ -73,14 +128,19 @@ app.get(OAUTH_INIT_PATH, function initUser(req, res) {
 });
 
 app.get('/', function displayData(req, res) {
-    getLast28StravaDays(req.cookies[COOKIE_NAME]).then(function (data) {
+    var twentyEightDaysAgo = moment().startOf('day').subtract(27, 'days');
+    getLastStravaDays(req.cookies[COOKIE_NAME], twentyEightDaysAgo)
+        .then(calcStats(twentyEightDaysAgo))
+        .then(function (data) {
         console.log('Got data', data);
-        res.send(200, Math.round(getRunMeters(data) / 1000));
+        res.render('stats', {total: data.total, data: data});
     }).catch(function(e) {
         console.error('ERROR', e);
         system.exit(1);
     })
 });
+
+//STARTUP
 
 var server = app.listen(PORT, function () {
 
