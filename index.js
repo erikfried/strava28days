@@ -113,7 +113,7 @@ app.get(OAUTH_INIT_PATH, function initUser(req, res) {
         .then(function (tokenResponse) {
             var body = JSON.parse(tokenResponse.body);
             if (tokenResponse.statusCode === 200) {
-                res.cookie(COOKIE_NAME, body.access_token, { maxAge: 60 * 60 * 24 * 365 });
+                res.cookie(COOKIE_NAME, body.access_token, { maxAge: 60 * 60 * 24 * 365 * 1000 }); //Express uses millis for maxAge.
                 res.redirect('/');
             } else {
                 throw {
