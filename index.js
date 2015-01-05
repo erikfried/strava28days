@@ -128,7 +128,9 @@ app.get(OAUTH_INIT_PATH, function initUser(req, res) {
 });
 
 app.get('/', function displayData(req, res) {
-    var twentyEightDaysAgo = moment().startOf('day').subtract(27, 'days');
+    var twentyEightDaysAgo = moment()
+        //.startOf('day')
+        .subtract(28, 'days');
     getLastStravaDays(req.cookies[COOKIE_NAME], twentyEightDaysAgo)
         .then(calcStats(twentyEightDaysAgo))
         .then(function (data) {
