@@ -32,7 +32,7 @@ function metersToKms (number) {
 }
 function fillDates(days, startMoment, endMoment) {
     var dates = [];
-    var interval = endMoment ? endMoment.diff(startMoment, 'days') : 29;
+    var interval = endMoment ? endMoment.diff(startMoment, 'days') : 28;
     var current = startMoment, i, value;
     for (i = 0; i < interval; i++) {
         value = days[current.format('YYYY-MM-DD')] || 0;
@@ -45,9 +45,9 @@ function calcStats (startMoment) {
     return function (activitiesByType) {
         return _.transform(activitiesByType, function (result, activities, type) {
             var days =  _.chain(activities)
-                .groupBy(function (a) {return a.start_date.substring(0,10);})
+                .groupBy(function groupByStartDate (a) {return a.start_date.substring(0,10);})
                 .mapValues(function (val) {
-                    return _.reduce(val, function (sum, act){
+                    return _.reduce(val, function sum(sum, act){
                         return sum + act.distance
                     }, 0);
                 })
@@ -129,13 +129,13 @@ app.get(OAUTH_INIT_PATH, function initUser(req, res) {
 
 app.get('/', function displayData(req, res) {
     var twentyEightDaysAgo = moment()
-        //.startOf('day')
-        .subtract(28, 'days');
+        .startOf('day')
+        .subtract(27, 'days');
     getLastStravaDays(req.cookies[COOKIE_NAME], twentyEightDaysAgo)
         .then(calcStats(twentyEightDaysAgo))
         .then(function (data) {
         console.log('Got data', data);
-        res.render('stats', {total: data.total, data: data});
+        res.render('stats', {data: data});
     }).catch(function(e) {
         console.error('ERROR', e);
         system.exit(1);
