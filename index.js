@@ -32,7 +32,7 @@ function metersToKms (number) {
 }
 function fillDates(days, startMoment, endMoment) {
     var dates = [];
-    var interval = endMoment ? endMoment.diff(startMoment, 'days') : 28;
+    var interval = endMoment ? endMoment.diff(startMoment, 'days') : 29;
     var current = startMoment, i, value;
     for (i = 0; i < interval; i++) {
         value = days[current.format('YYYY-MM-DD')] || 0;
