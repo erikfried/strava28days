@@ -28,7 +28,7 @@ body {
     position: relative;
     /*padding-bottom: 82px;*/
     margin: 10px 0 10px 0;
-    padding: 5px 5px 82px 5px;
+    padding: 10px 10px 82px 10px;
 }
 
 .text {
@@ -61,8 +61,6 @@ ul {
 }
 
 .interval-graph {
-    /*border-top: 1px dashed #fff;*/
-    /*border-top: 1px dashed #FC4C02;*/
     width: 100%;
     padding: 0;
     margin: 0;
@@ -70,15 +68,17 @@ ul {
     position: absolute;
 }
 .interval-graph ul {
-    height: 81px;
     padding: 0;
     margin: 0;
 }
 .interval-graph li {
     margin: 0 1px 0 0;
-    border-top: 1px solid #0070A0;
+    border-top: 1px solid #ccc;
+    /*border-top: 1px solid #0070A0;*/
+    border-bottom: 1px solid #ccc
+    /*border-bottom: 1px solid #0070A0;*/
     /*border-top: 1px solid #FC4C02;*/
-    height: 50px;
+    height: 82px;
     float: left;
     width: 9px;
 }
@@ -91,7 +91,6 @@ ul {
 .fill {
     width: 100%;
     position: absolute;
-    bottom: 0;
+    bottom: 0px;
     background: #0070A0;
-    border-bottom: 1px solid #0070A0;
 }
