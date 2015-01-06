@@ -3,8 +3,6 @@ var oauth = require('./lib/oauth');
 var _ = require('lodash');
 var moment = require('moment');
 
-console.log('ENV', process.env);
-
 function getRunMeters(payload) {
     if (!typeof payload === 'array') {
         console.error('Not an array', payload);
@@ -27,9 +25,11 @@ function getLastStravaDays(token, startMoment) {
         return _.groupBy(activities, 'type')
     });
 }
+
 function metersToKms (number) {
     return (Math.round(number /100)) /10
 }
+
 function fillDates(days, startMoment, endMoment) {
     var dates = [];
     var interval = endMoment ? endMoment.diff(startMoment, 'days') : 28;
@@ -41,29 +41,34 @@ function fillDates(days, startMoment, endMoment) {
     }
     return dates;
 }
+
 function calcStats (startMoment) {
     return function (activitiesByType) {
         return _.transform(activitiesByType, function (result, activities, type) {
             var days =  _.chain(activities)
-                .groupBy(function groupByStartDate (a) {return a.start_date.substring(0,10);})
-                .mapValues(function (val) {
-                    return _.reduce(val, function sum(sum, act){
+                .groupBy(function getActivityStartDate (activity) {
+                    return activity.start_date.substring(0,10);
+                })
+                .mapValues(function sumAllDistancesForDay(dayActivities) {
+                    return _.reduce(dayActivities, function addDistance(sum, act){
                         return sum + act.distance
                     }, 0);
-                })
-                .value();
+                });
 
             result[type] = {
-                longest: metersToKms(_.chain(days)
+                longest: metersToKms(days
                     .values()
                     .max()
                     .value()),
-                total: metersToKms(_.reduce(days, function (sum, activity) { return sum += activity;})),
-                days: fillDates(days, startMoment)
+                total: metersToKms(days
+                    .reduce(function (sum, activity) { return sum + activity;})
+                    .value()),
+                days: fillDates(days.value(), startMoment)
             }
         });
     };
 };
+
 var express = require('express');
 var app = express();
 
