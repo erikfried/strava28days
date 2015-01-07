@@ -4,14 +4,13 @@ html
         .header
             .text 28 <strong> strava </strong>days
         .content
-            .grid
+
                 .type
-                    p.
-                        In older versions of the strava app there was a number.
-                        The accumulated distance covered over the last 28 days.
-                        I used it as my KPI and I miss it. Here it is.
-            .grid
-                .type
+                    img(src='/images/screenshot.png' width=155 style='float:right')
+                    p In older versions of the strava app there was this number -
+                    p the accumulated distance covered over the last 28 days.
+                    p I used it as my KPI and I miss it. Here it is.
+                    p Connect with strava and start using it.
+
                     a(href!= authUrl)
                         img(alt='Connect with strava' src='/images/strava-connect.png' width='171')
-
