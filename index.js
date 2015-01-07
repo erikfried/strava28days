@@ -63,6 +63,7 @@ function calcStats (startMoment) {
                 total: metersToKms(days
                     .reduce(function (sum, activity) { return sum + activity;})
                     .value()),
+                climb: Math.round(_.reduce(activities, function (sum, activity) { return sum + activity.total_elevation_gain }, 0)),
                 days: fillDates(days.value(), startMoment)
             }
         });
@@ -139,12 +140,13 @@ app.get('/', function displayData(req, res) {
     getLastStravaDays(req.cookies[COOKIE_NAME], twentyEightDaysAgo)
         .then(calcStats(twentyEightDaysAgo))
         .then(function (data) {
-        console.log('Got data', data);
-        res.render('stats', {data: data});
-    }).catch(function(e) {
-        console.error('ERROR', e);
-        system.exit(1);
-    })
+            console.log('Got data', data);
+            res.render('stats', {data: data});
+        })
+        .catch(function (e) {
+            console.error('ERROR', e);
+            system.exit(1);
+        });
 });
 
 //STARTUP

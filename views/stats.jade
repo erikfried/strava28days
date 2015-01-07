@@ -1,19 +1,19 @@
 html
-    head
-        title Strava 28 last days
-        link(rel='stylesheet', href='/css/style.css')
-        meta(name='viewport' content='width=device-width')
+    include ./includes/head
     body
-        .content
-            .text Your last 28 strava days
-            each val, key in data
-                .type #{key}s
-                    .data= val.total
-                    .unit km total
-                    .legend longest #{key} #{val.longest} km
-                    .interval-graph
-                        ul
-                            each day in val.days
-                                li
-                                    .bar
-                                        .fill(style='height:' + 100 * day / val.longest + '%')
+.header
+    .text 28 <strong> strava </strong>days
+.content
+    each val, key in data
+        .grid
+            .type #{key}s
+                .data= val.total
+                    span.unit km
+                .legend #{val.climb} m climbed
+                .legend longest #{key} #{val.longest} km
+                .interval-graph
+                    ul
+                        each day in val.days
+                            li
+                                .bar
+                                    .fill(style='height:' + 100 * day / val.longest + '%')
