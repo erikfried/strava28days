@@ -1,19 +1,22 @@
 html
     include ./includes/head
     body
-.header
-    .text 28 <strong> strava </strong>days
-.content
-    each val, key in data
-        .grid
-            .type #{key}s
-                .data= val.total
-                    span.unit km
-                .legend #{val.climb} m climbed
-                .legend longest #{key} #{val.longest} km
-                .interval-graph
-                    ul
-                        each day in val.days
-                            li
-                                .bar
-                                    .fill(style='height:' + 100 * day / val.longest + '%')
+        .header
+            .text 28 <strong> strava </strong>days
+        .content
+            if token && token.length
+                p You now have a token. It is recommended that you visit the following url and add it as a home-screen app:
+                    a(href='/?token=#{token}')
+            each val, key in data
+                .grid
+                    .type #{key}s
+                        .data= val.total
+                            span.unit km
+                        .legend #{val.climb} m climbed
+                        .legend longest #{key} #{val.longest} km
+                        .interval-graph
+                            ul
+                                each day in val.days
+                                    li
+                                        .bar
+                                            .fill(style='height:' + 100 * day / val.longest + '%')

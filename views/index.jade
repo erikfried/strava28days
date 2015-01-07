@@ -1,8 +1,17 @@
 html
-    head
-        title Strava 28 last days
-        link(rel='stylesheet', href='/css/style.css')
+    include ./includes/head
     body
-        a(href!= authUrl)
-            img(alt='Connect with strava')
+        .header
+            .text 28 <strong> strava </strong>days
+        .content
+            .grid
+                .type
+                    p.
+                        In older versions of the strava app there was a number.
+                        The accumulated distance covered over the last 28 days.
+                        I used it as my KPI and I miss it. Here it is.
+            .grid
+                .type
+                    a(href!= authUrl)
+                        img(alt='Connect with strava' src='/images/strava-connect.png' width='171')
 

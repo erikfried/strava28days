@@ -1,3 +1,4 @@
+
 var strava = require('./lib/strava');
 var oauth = require('./lib/oauth');
 var _ = require('lodash');
@@ -70,12 +71,21 @@ function calcStats (startMoment) {
     };
 };
 
+function getToken(req) {
+    return req.cookies[COOKIE_NAME] || req.query.token;
+}
+
 var express = require('express');
 var app = express();
-
 app.set('view engine', 'jade');
 
 app.use(require('cookie-parser')());
+app.use(require('express-session')({
+    resave: false,
+    saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || 'asdf'
+}));
+app.use(require('connect-flash')());
 app.use(require('helmet')());
 app.use(express.static('public', {}));
 
@@ -84,11 +94,13 @@ var OAUTH_INIT_PATH = '/oauth/init';
 var PORT = process.env.PORT || 3000;
 var APP_HOST = process.env.APP_HOST || 'http://localhost:' + PORT;
 
+
+
 // MIDDLEWARE
 //Check user status
 app.use(function checkKnownUser(req, res, next) {
     console.log('req', req.cookies);
-    if (req.cookies[COOKIE_NAME]) {
+    if (getToken(req)) {
         //ok
         next();
     } else if (!req.query.code) {
@@ -120,6 +132,7 @@ app.get(OAUTH_INIT_PATH, function initUser(req, res) {
             var body = JSON.parse(tokenResponse.body);
             if (tokenResponse.statusCode === 200) {
                 res.cookie(COOKIE_NAME, body.access_token, { maxAge: 60 * 60 * 24 * 365 * 1000 }); //Express uses millis for maxAge.
+                req.flash('token', body.access_token);
                 res.redirect('/');
             } else {
                 throw {
@@ -137,11 +150,12 @@ app.get('/', function displayData(req, res) {
     var twentyEightDaysAgo = moment()
         .startOf('day')
         .subtract(27, 'days');
-    getLastStravaDays(req.cookies[COOKIE_NAME], twentyEightDaysAgo)
+    getLastStravaDays(getToken(req), twentyEightDaysAgo)
         .then(calcStats(twentyEightDaysAgo))
         .then(function (data) {
-            console.log('Got data', data);
-            res.render('stats', {data: data});
+            var token = req.flash('token');
+            console.log('Got data', data, token);
+            res.render('stats', {data: data, token: token});
         })
         .catch(function (e) {
             console.error('ERROR', e);
