@@ -5,8 +5,8 @@ html
             .text 28 <strong> strava </strong>days
         .content
             if token && token.length
-                p You now have a token. It is recommended that you visit the following url and add it as a home-screen app:
-                    a(href='/?token=#{token}')
+                p You now have a token. It is recommended that you follow the link and add it as a home-screen app:
+                    a(href='/?token=#{token}') Session handover
             each val, key in data
                 .grid
                     .type #{key}s
