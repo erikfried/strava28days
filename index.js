@@ -4,20 +4,6 @@ var oauth = require('./lib/oauth');
 var _ = require('lodash');
 var moment = require('moment');
 
-function getRunMeters(payload) {
-    if (!typeof payload === 'array') {
-        console.error('Not an array', payload);
-        process.exit(1);
-    }
-    var runs = payload.filter(function (activity) {
-        return activity.type === 'Run';
-    });
-    return runs.reduce(function (ack, run) {
-        return ack += run.distance;
-    }, 0);
-
-}
-
 function getLastStravaDays(token, startMoment) {
     return strava.listActivities({
         after: startMoment.unix(),
@@ -46,7 +32,7 @@ function fillDates(days, startMoment, endMoment) {
 function calcStats (startMoment) {
     return function (activitiesByType) {
         return _.transform(activitiesByType, function (result, activities, type) {
-            var days =  _.chain(activities)
+            var _days =  _.chain(activities)
                 .groupBy(function getActivityStartDate (activity) {
                     return activity.start_date.substring(0,10);
                 })
@@ -57,15 +43,15 @@ function calcStats (startMoment) {
                 });
 
             result[type] = {
-                longest: metersToKms(days
+                longest: metersToKms(_days
                     .values()
                     .max()
                     .value()),
-                total: metersToKms(days
+                total: metersToKms(_days
                     .reduce(function (sum, activity) { return sum + activity;})
                     .value()),
                 climb: Math.round(_.reduce(activities, function (sum, activity) { return sum + activity.total_elevation_gain }, 0)),
-                days: fillDates(days.value(), startMoment)
+                days: fillDates(_days.value(), startMoment)
             }
         });
     };
@@ -94,8 +80,6 @@ var OAUTH_INIT_PATH = '/oauth/init';
 var PORT = process.env.PORT || 3000;
 var APP_HOST = process.env.APP_HOST || 'http://localhost:' + PORT;
 
-
-
 // MIDDLEWARE
 //Check user status
 app.use(function checkKnownUser(req, res, next) {
@@ -111,7 +95,6 @@ app.use(function checkKnownUser(req, res, next) {
         res.render('index', {
             authUrl: authUrl
         });
-        //res.redirect()
     } else if (req.query.code) {
         console.log('New session!');
         next();
@@ -159,14 +142,12 @@ app.get('/', function displayData(req, res) {
         })
         .catch(function (e) {
             console.error('ERROR', e);
-            system.exit(1);
+            res.status(500).send('Error rendering stats');
         });
 });
 
 //STARTUP
-
 var server = app.listen(PORT, function () {
-
     var host = server.address().address
     var port = server.address().port
     console.log('Example app listening at http://%s:%s', host, port)
